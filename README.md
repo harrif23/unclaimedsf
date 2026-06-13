@@ -2,6 +2,8 @@
 
 **Find the San Francisco benefits you're entitled to — with the exact rule behind every match.**
 
+**Live:** https://unclaimedsf.org · open-source, deployed on Vercel.
+
 Public Works screens a resident against real public-benefit rules and tells them, in plain language, which programs they qualify for, *why* (the specific rule that matched), and where to apply. Answer a handful of questions, learn that one enrollment (e.g. CalFresh) cascades into several more discounts you never knew you qualified for.
 
 The defensible idea: **AI does the hard reasoning offline, once, and verifies itself; the shipped app is plain deterministic code; the resident's answers never leave the browser.**
@@ -52,7 +54,8 @@ Environment variables (copy `.env.example` → `.env`):
 ```
 data/        programs.json (input) · ruleset.json (compiled artifact) · test-cases.json (rubric) · impact.json
 workflow/    compile-ruleset.mjs (the dynamic workflow) · grade.mjs · pums-impact.mjs · smoke-test.mjs
-app/         Vite + React; src/match.js (engine, shared with the grader); api/draft-application.js (form-draft)
+app/         Vite + React; src/match.js (engine, shared with the grader)
+api/         draft-application.js (form-draft serverless function — runs on Vercel)
 PLAN.md      the implementation plan · project-plan.md  the original brief
 ```
 
