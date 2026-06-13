@@ -1,17 +1,17 @@
 #!/usr/bin/env node
 /**
- * compile-ruleset.mjs — Public Works rule-compilation workflow (Half A).
+ * compile-ruleset.mjs - Public Works rule-compilation workflow (Half A).
  *
  * The rerunnable orchestration the demo saves as a /command. Point it at a different
  * city's data/programs.json and it recompiles with NO code changes.
  *
  * Per program in data/programs.json:
- *   1. EXTRACT — one subagent reads the official source(s) and emits rules in the
+ *   1. EXTRACT - one subagent reads the official source(s) and emits rules in the
  *                ruleset schema (extractPrompt).
- *   2. VERIFY  — a second, INDEPENDENT subagent re-derives from the source and
+ *   2. VERIFY  - a second, INDEPENDENT subagent re-derives from the source and
  *                challenges the extraction: AGREE | DISAGREE + diffs (verifyPrompt).
- *   3. COMPILE — merge only verified rules into data/ruleset.json (compile).
- *   4. GRADE   — run workflow/grade.mjs (the SAME match.js the browser ships).
+ *   3. COMPILE - merge only verified rules into data/ruleset.json (compile).
+ *   4. GRADE   - run workflow/grade.mjs (the SAME match.js the browser ships).
  *
  * The fan-out (steps 1-2) is run by the Claude Code workflow runtime, which provides
  * runAgent(role, prompt). Invoke the whole thing with the `ultracode` keyword (prompt
@@ -19,7 +19,7 @@
  * 3-4 are plain deterministic Node and run anywhere.
  *
  * Design rule: the eligibility TREE SHAPE for each program is fixed by us (a product
- * decision — a deterministic screen) and pinned in programs.json; agents fill in the
+ * decision - a deterministic screen) and pinned in programs.json; agents fill in the
  * verified threshold tables, ruleText, sources, and caveats. Disagreements are
  * surfaced (verdict: DISAGREE-reconciled), never silently merged.
  */
@@ -46,7 +46,7 @@ Keep this eligibility tree shape EXACTLY (fill only ruleText + any threshold tab
 ${JSON.stringify(p.eligibilityShape, null, 2)}
 ${SCHEMA}
 Return ONE fenced json block: { programId, thresholdTable|null, program{ id,name,benefitText,applyUrl,source{url,effectiveDate,verifiedBy:[]},eligibility }, caveats[], citations[{url,supports,quote}] }.
-Every $ figure must come from a page you fetched — quote it with its household size. Flag anything unverifiable. Your output will be adversarially checked.`;
+Every $ figure must come from a page you fetched - quote it with its household size. Flag anything unverifiable. Your output will be adversarially checked.`;
 }
 
 export function verifyPrompt(p, extraction) {
@@ -60,7 +60,7 @@ Return ONE fenced json block: { verdict:"AGREE|DISAGREE", independentTable{...}|
 Quote exact figures from each primary page. If you cannot verify from a primary source, say so explicitly.`;
 }
 
-// COMPILE — merge verified results into ruleset.json (deterministic).
+// COMPILE - merge verified results into ruleset.json (deterministic).
 export function compile(programs, results, base) {
   const ruleset = base || { meta: {}, thresholdTables: {}, inputs: [], programs: [] };
   ruleset.meta = { ...ruleset.meta, compiledAt: new Date().toISOString().slice(0, 10) };
@@ -89,7 +89,7 @@ async function main() {
   const { core } = read('data/programs.json');
   if (typeof globalThis.runAgent !== 'function') {
     console.log('This workflow fans out subagents (extract + independent verify) and must run under the\n' +
-      'Claude Code workflow runtime — invoke it with the `ultracode` prompt in PLAN.md.\n' +
+      'Claude Code workflow runtime - invoke it with the `ultracode` prompt in PLAN.md.\n' +
       'Steps 3-4 (compile + grade) are deterministic: `node workflow/grade.mjs` runs standalone.');
     return;
   }

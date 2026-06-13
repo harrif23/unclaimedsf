@@ -84,7 +84,7 @@ async function main() {
     try { rows = await pull(y); yearUsed = y; break; }
     catch (e) { console.error(e.message); }
   }
-  if (!rows) { console.error('PUMS unreachable — keeping existing data/impact.json'); process.exit(2); }
+  if (!rows) { console.error('PUMS unreachable - keeping existing data/impact.json'); process.exit(2); }
 
   const a = analyze(rows);
   const n = Math.round(a.eligNotReceiving);
@@ -102,16 +102,15 @@ async function main() {
 
   const impact = {
     scope: 'San Francisco',
-    headline: `About ${roundedN} San Francisco households likely qualify for CalFresh but aren't receiving it — an estimated ${fmt$} in food benefits left unclaimed every year.`,
-    uiNote: `Modeled upper bound from a 130%-FPL gross-income screen over real Census microdata; the true figure is lower (the screen omits CalFresh's net-income and asset tests). Observed take-up in this data: ${takeupPct}%. Shown for scale, not as an official count.`,
+    headline: `About ${roundedN} San Francisco households likely qualify for CalFresh but aren't receiving it. That is an estimated ${fmt$} in food benefits left unclaimed every year.`,
     n_households: n,
     population_in_those_households: Math.round(a.popEligNotReceiving),
     dollars_unclaimed_per_year: dollars,
     observed_takeup_pct: Number((a.takeUp * 100).toFixed(1)),
     method: `Ran the app's CalFresh gross-income screen (200% FPL by household size) over every household record in the Census ACS ${yearUsed} 5-year PUMS for SF PUMAs ${PUMAS.join('/')}, then kept those that pass the screen AND report FS=2 (not receiving SNAP), weighted by WGTP.`,
-    assumptions: [`Dollar figure = households x $${AVG_MONTHLY_BENEFIT_PER_HH}/month x 12 (approx. CA average CalFresh issuance per household) — an estimate, not a measured total.`],
+    assumptions: [`Dollar figure = households x $${AVG_MONTHLY_BENEFIT_PER_HH}/month x 12 (approx. CA average CalFresh issuance per household) - an estimate, not a measured total.`],
     caveats: [
-      'Modeled gross-income screen only — no net-income, deduction, or asset test, so it approximates eligibility, not an official determination.',
+      'Modeled gross-income screen only - no net-income, deduction, or asset test, so it approximates eligibility, not an official determination.',
       'SNAP receipt (FS) is self-reported and under-reported in the ACS, so the not-receiving count likely OVERSTATES the true gap.',
       'PUMS is a weighted sample, not a census of every household.',
       'Household income is ACS 5-year (2019-2023, inflation-adjusted to 2023) compared against current thresholds, so the estimate is approximate.',

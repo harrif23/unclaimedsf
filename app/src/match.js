@@ -1,13 +1,13 @@
 // Deterministic 3-valued eligibility match engine for Public Works.
 //
-// Pure functions, no I/O. Imported by BOTH the browser app and workflow/grade.mjs —
+// Pure functions, no I/O. Imported by BOTH the browser app and workflow/grade.mjs -
 // the code the grader proves green is the exact code that ships.
 //
 // Every rule node evaluates to TRUE, FALSE, or UNKNOWN (an input wasn't answered yet):
 //   - all (AND): TRUE if all TRUE; FALSE if any FALSE; else UNKNOWN
 //   - any (OR):  TRUE if any TRUE; FALSE if all FALSE; else UNKNOWN
 // Program status: TRUE -> "full", FALSE -> "no", UNKNOWN -> "partial".
-// For partials we collect the unanswered inputs on still-satisfiable branches —
+// For partials we collect the unanswered inputs on still-satisfiable branches -
 // those become the precise "we still need: ___" prompts. No guessing.
 
 export const TRUE = 'true';
@@ -20,7 +20,7 @@ const uniq = (arr) => [...new Set(arr)];
 
 // --- leaf evaluation --------------------------------------------------------
 
-// { income: "<thresholdTableId>" } — matches the user's yes/no answer to
+// { income: "<thresholdTableId>" } - matches the user's yes/no answer to
 // "is your income at or below $X (for your household size)?". The dollar amount
 // is rendered by the questionnaire from household_size; the engine only reads
 // the boolean, so exact income is never needed here.
@@ -34,7 +34,7 @@ function evalIncome(node, answers) {
   return { value: UNKNOWN, satisfied: [], missing };
 }
 
-// { enrolledAny: ["calfresh","medi_cal",...] } — categorical-qualification path.
+// { enrolledAny: ["calfresh","medi_cal",...] } - categorical-qualification path.
 function evalEnrolledAny(node, answers) {
   const ans = answers.enrolled_programs;
   if (ans === undefined || ans === null) return { value: UNKNOWN, satisfied: [], missing: ['enrolled_programs'] };
@@ -45,7 +45,7 @@ function evalEnrolledAny(node, answers) {
     : { value: FALSE, satisfied: [], missing: [] };
 }
 
-// { field, equals|notEquals|in } — generic scalar leaf.
+// { field, equals|notEquals|in } - generic scalar leaf.
 function evalField(node, answers) {
   const ans = answers[node.field];
   if (ans === undefined || ans === null) return { value: UNKNOWN, satisfied: [], missing: [node.field] };

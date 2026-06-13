@@ -1,8 +1,8 @@
-# Public Works — Implementation Plan
+# Public Works - Implementation Plan
 
 SF benefit-eligibility finder. **AI does the hard reasoning offline, once, and verifies itself; the shipped app is plain deterministic JS over a compiled `ruleset.json`; the resident's answers never leave the browser; every match is shown with the exact rule that produced it.**
 
-> This is the canonical, decision-locked plan — verify work against it.
+> This is the canonical, decision-locked plan - verify work against it.
 > The source brief (the *why* + hackathon rules) is `project-plan.md`. This doc is the *how*.
 > Deadline: submissions due **5:00 PM on build day**. Keep a buffer.
 
@@ -12,39 +12,39 @@ SF benefit-eligibility finder. **AI does the hard reasoning offline, once, and v
 
 | Decision | Choice |
 |---|---|
-| **Anchor program** | **CalFresh** (pivoted from the brief's SFPUC/CARE seeds — see §2 rationale) |
-| **Program set** | Core 6, get **4 green first**, stretch toward 8–9 only if ahead |
+| **Anchor program** | **CalFresh** (pivoted from the brief's SFPUC/CARE seeds - see §2 rationale) |
+| **Program set** | Core 6, get **4 green first**, stretch toward 8-9 only if ahead |
 | **Frontend** | React + Vite (static build) |
 | **Host** | Vercel |
-| **Form-draft finale** | **In scope** — Vercel serverless function (the one justified runtime AI call; drafts the form, never decides eligibility) |
-| **Impact narrative + test set** | **US Census ACS PUMS** — real anonymized SF household microdata |
+| **Form-draft finale** | **In scope** - Vercel serverless function (the one justified runtime AI call; drafts the form, never decides eligibility) |
+| **Impact narrative + test set** | **US Census ACS PUMS** - real anonymized SF household microdata |
 | **Determinism principle** | Runtime is 100% deterministic. AI appears only offline (compile + adversarial verify) and in the single form-draft step. |
-| **Complex programs** | Run an eligibility **screen** ("you appear eligible — apply to confirm"), not a final determination. Honest, matches real screeners, keeps "rule shown = rule applied" true. |
+| **Complex programs** | Run an eligibility **screen** ("you appear eligible - apply to confirm"), not a final determination. Honest, matches real screeners, keeps "rule shown = rule applied" true. |
 
 ---
 
-## 2. Scope — programs
+## 2. Scope - programs
 
-**Why the pivot:** SFPUC CAP + CARE were the brief's seeds, but CARE is ~90%+ already enrolled (tiny unclaimed pool) and SFPUC's payout/take-up is unpublished. The real unclaimed money is **CalFresh** (~$3.46B/yr unclaimed in CA ⚑) and **EITC/CalEITC**. CalFresh is also the **master key**: one enrollment categorically qualifies a household for several downstream programs — the chaining demo.
+**Why the pivot:** SFPUC CAP + CARE were the brief's seeds, but CARE is ~90%+ already enrolled (tiny unclaimed pool) and SFPUC's payout/take-up is unpublished. The real unclaimed money is **CalFresh** (~$3.46B/yr unclaimed in CA ⚑) and **EITC/CalEITC**. CalFresh is also the **master key**: one enrollment categorically qualifies a household for several downstream programs - the chaining demo.
 
 **Core 6** (impact × eligibility-chaining):
 
 | id | Program | Role | Rule shape | Chains from |
 |---|---|---|---|---|
-| `calfresh` | CalFresh (SNAP) | **Anchor + master key**; drives the PUMS stat (PUMS has a SNAP-receipt flag) | gross ≤200% FPL + net ≤100% FPL by household size (SCREEN) | — |
+| `calfresh` | CalFresh (SNAP) | **Anchor + master key**; drives the PUMS stat (PUMS has a SNAP-receipt flag) | gross ≤200% FPL + net ≤100% FPL by household size (SCREEN) | - |
 | `medi-cal` | Medi-Cal | Second anchor; highest *value*; SSI auto-enrolls | income ≤138% FPL (adults) by size; categorical | SSI |
 | `ca-lifeline` | California LifeLine (phone/broadband) | **Largest take-up gap (~77% unenrolled ⚑)** | income OR categorical | CalFresh, Medi-Cal, SSI, WIC |
 | `care-fera` | CARE/FERA (energy) | Clean chaining demo (~$500/yr ⚑) | income ≤200% FPL OR categorical | CalFresh, Medi-Cal, SSI, WIC |
 | `muni-lifeline` | Muni Lifeline / Clipper START | Keeps it visibly **SF** | income ≤200% FPL OR categorical (Clipper START) | CalFresh, Medi-Cal |
-| `eitc-caleitc` | Federal EITC + CalEITC (+YCTC) | **Cash headline** (does NOT chain — needs tax filing) | earned-income phase-in/out; must file | — |
+| `eitc-caleitc` | Federal EITC + CalEITC (+YCTC) | **Cash headline** (does NOT chain - needs tax filing) | earned-income phase-in/out; must file | - |
 
 **Stretch** (add as pure data, no code change, only if green with time): `recology` (refuse discount), `sf-school-meals` (universal), `sfpuc-cap` (water/sewer), `wic`.
 
-> ⚑ = figure/URL to confirm during extraction. Muni Lifeline is **transitioning to Clipper START (no new Lifeline apps after 2026-05-01)** — verify current rule. Threshold tables (FPL/AMI by household size) change yearly; extraction must cite source + effective date.
+> ⚑ = figure/URL to confirm during extraction. Muni Lifeline is **transitioning to Clipper START (no new Lifeline apps after 2026-05-01)** - verify current rule. Threshold tables (FPL/AMI by household size) change yearly; extraction must cite source + effective date.
 
 ---
 
-## 3. Architecture — two separated halves
+## 3. Architecture - two separated halves
 
 ```
   HALF A  (offline, AI-heavy, run once)         HALF B  (runtime, deterministic, no AI)
@@ -72,32 +72,32 @@ SF benefit-eligibility finder. **AI does the hard reasoning offline, once, and v
 
 ## 4. Data model / schemas
 
-**`data/programs.json`** — workflow INPUT. Seed list only: `{id, name, agency, level, role, benefitSummary, ruleShape, chainsFrom[], sources[{type,url,note}]}`. Rule *details* are intentionally absent — they get extracted + verified from sources.
+**`data/programs.json`** - workflow INPUT. Seed list only: `{id, name, agency, level, role, benefitSummary, ruleShape, chainsFrom[], sources[{type,url,note}]}`. Rule *details* are intentionally absent - they get extracted + verified from sources.
 
-**`data/ruleset.json`** — workflow OUTPUT, the artifact. Shape:
-- `meta` — jurisdiction, compiledAt, graderStatus.
-- `thresholdTables` — named tables `{description, source{url,effectiveDate}, byHouseholdSize{1:…,2:…}}` (FPL and AMI based).
-- `inputs[]` — drives the generated questionnaire (see canonical input ids below).
-- `programs[]` — each `{id, name, benefitText, applyUrl, source, eligibility}` (or `tiers[]` for tiered benefits). `eligibility` is a boolean tree:
+**`data/ruleset.json`** - workflow OUTPUT, the artifact. Shape:
+- `meta` - jurisdiction, compiledAt, graderStatus.
+- `thresholdTables` - named tables `{description, source{url,effectiveDate}, byHouseholdSize{1:…,2:…}}` (FPL and AMI based).
+- `inputs[]` - drives the generated questionnaire (see canonical input ids below).
+- `programs[]` - each `{id, name, benefitText, applyUrl, source, eligibility}` (or `tiers[]` for tiered benefits). `eligibility` is a boolean tree:
   - `{ "all": [...] }` (AND) · `{ "any": [...] }` (OR) · `{ "not": ... }`
-  - leaf: `{ field, op, value | table, ruleText, source }` — every leaf carries human-readable `ruleText` (the trust mechanism) and a source citation.
+  - leaf: `{ field, op, value | table, ruleText, source }` - every leaf carries human-readable `ruleText` (the trust mechanism) and a source citation.
 
-**`data/test-cases.json`** — the RUBRIC. `cases[]` of `{id, description, answers, expect{programId: "full"|"partial"|"no"}, expectMissing{}, expectTier{}}`. Grader = match.js over these; **100% pass = done**. Seeded by hand (boundary cases) + PUMS-derived personas.
+**`data/test-cases.json`** - the RUBRIC. `cases[]` of `{id, description, answers, expect{programId: "full"|"partial"|"no"}, expectMissing{}, expectTier{}}`. Grader = match.js over these; **100% pass = done**. Seeded by hand (boundary cases) + PUMS-derived personas.
 
-**`data/impact.json`** — PUMS OUTPUT. `{n_households, dollars_unclaimed_per_year, program, method, source, caveats[]}`.
+**`data/impact.json`** - PUMS OUTPUT. `{n_households, dollars_unclaimed_per_year, program, method, source, caveats[]}`.
 
 **Canonical input ids** (referenced by test-cases and ruleset.inputs):
-`household_size` (int) · `enrolled_programs` (multiselect: `calfresh|medi_cal|wic|ssi|calworks|medicare|none`) · `income_at_or_below` (map of thresholdTable id → bool; app computes $ from household size and asks yes/no — exact income never collected) · `has_earned_income` (bool) · `will_file_taxes` (bool) · `child_under_6` (bool) · `child_under_5` (bool) · `age_65_plus` (bool) · `has_disability` (bool) · `sf_resident` (bool). Optional/secondary inputs (e.g., SFPUC `account_type`, `claimed_as_dependent`) drive *partial* matches.
+`household_size` (int) · `enrolled_programs` (multiselect: `calfresh|medi_cal|wic|ssi|calworks|medicare|none`) · `income_at_or_below` (map of thresholdTable id → bool; app computes $ from household size and asks yes/no - exact income never collected) · `has_earned_income` (bool) · `will_file_taxes` (bool) · `child_under_6` (bool) · `child_under_5` (bool) · `age_65_plus` (bool) · `has_disability` (bool) · `sf_resident` (bool). Optional/secondary inputs (e.g., SFPUC `account_type`, `claimed_as_dependent`) drive *partial* matches.
 
 ---
 
-## 5. Match engine (`app/src/match.js`) — 3-valued logic
+## 5. Match engine (`app/src/match.js`) - 3-valued logic
 
 Every node evaluates to **TRUE / FALSE / UNKNOWN** (input unanswered):
 - `all`: TRUE if all TRUE; FALSE if any FALSE; else UNKNOWN.
 - `any`: TRUE if any TRUE; FALSE if all FALSE; else UNKNOWN.
 
-Result mapping: tree TRUE → **full match**; FALSE → **no match**; UNKNOWN → **partial match**. For partials, walk the still-satisfiable branches and collect unanswered leaves → the precise "we still need: ___" prompts. No guessing, fully deterministic, pure function (same inputs → same output), no I/O — so it runs identically in the browser and in the grader.
+Result mapping: tree TRUE → **full match**; FALSE → **no match**; UNKNOWN → **partial match**. For partials, walk the still-satisfiable branches and collect unanswered leaves → the precise "we still need: ___" prompts. No guessing, fully deterministic, pure function (same inputs → same output), no I/O - so it runs identically in the browser and in the grader.
 
 ---
 
@@ -123,7 +123,7 @@ public-works/
 └─ app/
    ├─ index.html · vite.config.js · package.json
    ├─ src/
-   │  ├─ match.js             # 3-valued engine — imported by grade.mjs & pums-impact.mjs too
+   │  ├─ match.js             # 3-valued engine - imported by grade.mjs & pums-impact.mjs too
    │  ├─ App.jsx · main.jsx
    │  └─ components/ Questionnaire.jsx · Results.jsx · ProgramCard.jsx
    └─ api/
@@ -157,7 +157,7 @@ Run via `ultracode` (high reasoning + auto-orchestration), then save as a `/comm
 ## 9. Privacy & honesty stance (state out loud)
 
 - **On-device matching** for the core flow; collect **attributes, not identity**; income asked as yes/no against computed thresholds, never exact salary.
-- **Form-draft caveat:** matching stays on device, but if the resident clicks "draft my application," only the needed fields are sent (with consent) to the serverless function. The AI there **drafts the form only — it never decides eligibility.**
+- **Form-draft caveat:** matching stays on device, but if the resident clicks "draft my application," only the needed fields are sent (with consent) to the serverless function. The AI there **drafts the form only - it never decides eligibility.**
 - **PUMS caveats:** it's a *modeled screen* not an official determination; SNAP receipt is self-reported (under-reported → likely overstates the gap); it's a weighted *sample*, not every household. Say "estimated eligible," not "eligible." No real applicants were used.
 
 ---
@@ -176,13 +176,13 @@ Run via `ultracode` (high reasoning + auto-orchestration), then save as a `/comm
 |---|---|---|
 | **Dynamic workflow** (`ultracode`, saved `/command`) | Half A extract→verify→compile→grade; rerun on new city | Opus Use 15% + Orchestration 15% |
 | **Subagents** | extractor + adversarial verifier per program | Orchestration |
-| **`pdf-reading` skill** | CARE/FERA, Medi-Cal fact sheets are PDFs | — |
+| **`pdf-reading` skill** | CARE/FERA, Medi-Cal fact sheets are PDFs | - |
 | **`frontend-design` skill** | the React UI (mobile-first, low-literacy) | Demo 35% |
 | **`/deep-research`** | optional deeper rule verification (one pass done) | Impact 35% |
 | **Web allowlist** | extract agents fetch official pages without pausing | Orchestration |
 | **Effort control** | `ultracode` for workflow; `/effort high` for app code | cost/time |
 | **`/workflows`** | watch phases/agents/tokens live; drill in; save script | Orchestration |
-| **Memory + Tasks** | persist decisions; track build phases | — |
+| **Memory + Tasks** | persist decisions; track build phases | - |
 
 ---
 
@@ -192,17 +192,17 @@ Run via `ultracode` (high reasoning + auto-orchestration), then save as a `/comm
 - [ ] Live deployed URL + 1-minute demo video.
 - [ ] Demo shows **only** what was built during the event.
 - [ ] Cite all SF/state public-data sources in the ruleset.
-- [ ] **Not a banned type** — must read as a resident-facing *matching tool*, never a metrics dashboard.
+- [ ] **Not a banned type** - must read as a resident-facing *matching tool*, never a metrics dashboard.
 
 ---
 
 ## 13. Prerequisites needed to run unattended
 
 1. **Web-domain allowlist** for extract agents: `cdss.ca.gov`, `dhcs.ca.gov`, `cpuc.ca.gov`, `pge.com`, `irs.gov`, `ftb.ca.gov`, `ssa.gov`, `sfmta.com`, `clipperstartcard.com`, `sf.gov`, `sfpuc.gov`, `calfresh.guide`, `api.census.gov` (+ `phfewic.org`, `sfusd.edu` for stretch).
-2. **Census API key** (free) — optional; PUMS API works without one at low volume.
-3. **Anthropic API key** as a Vercel env var — for the form-draft function (step 8 only).
-4. **Vercel login** — at deploy time (step 7).
-5. **Credit discipline** — slice-test before fan-out ($500 / 24h cap).
+2. **Census API key** (free) - optional; PUMS API works without one at low volume.
+3. **Anthropic API key** as a Vercel env var - for the form-draft function (step 8 only).
+4. **Vercel login** - at deploy time (step 7).
+5. **Credit discipline** - slice-test before fan-out ($500 / 24h cap).
 
 ---
 

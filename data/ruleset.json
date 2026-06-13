@@ -2,12 +2,12 @@
   "meta": {
     "jurisdiction": "San Francisco, CA",
     "compiledAt": "2026-06-13",
-    "graderStatus": "compiled & adversarially verified — 6 core + 2 stretch (Recology, SF school meals)",
-    "_note": "Built by the compile workflow (extract -> independent adversarial verify -> compile -> grade). Each program's thresholds were extracted from official sources and re-derived independently by a second agent. Result: 5 AGREE, 1 DISAGREE (care-fera) reconciled — see that program's verificationNote (numbers unchanged, false derivation claim corrected). Two official sources blocked automated fetch and were cross-corroborated instead: clipperstartcard.com (muni-lifeline) and ftb.ca.gov (eitc-caleitc) — flagged in their caveats for human re-confirmation before launch. Note distinct FPL vintages by program: CalFresh uses the 2025 FPL (SNAP FFY runs Oct 1 2025-Sep 30 2026); Medi-Cal/CARE/Clipper START use the 2026 FPL. The engine matches on the user's yes/no income answers, so $ values only render the questionnaire."
+    "graderStatus": "compiled & adversarially verified - 6 core + 2 stretch (Recology, SF school meals)",
+    "_note": "Built by the compile workflow (extract -> independent adversarial verify -> compile -> grade). Each program's thresholds were extracted from official sources and re-derived independently by a second agent. Result: 5 AGREE, 1 DISAGREE (care-fera) reconciled - see that program's verificationNote (numbers unchanged, false derivation claim corrected). Two official sources blocked automated fetch and were cross-corroborated instead: clipperstartcard.com (muni-lifeline) and ftb.ca.gov (eitc-caleitc) - flagged in their caveats for human re-confirmation before launch. Note distinct FPL vintages by program: CalFresh uses the 2025 FPL (SNAP FFY runs Oct 1 2025-Sep 30 2026); Medi-Cal/CARE/Clipper START use the 2026 FPL. The engine matches on the user's yes/no income answers, so $ values only render the questionnaire."
   },
   "thresholdTables": {
     "calfresh_gross_200fpl": {
-      "description": "200% FPL gross monthly income by household size — California MCE/BBCE gross screening limit for CalFresh (FFY2026, derived from 2025 HHS poverty guidelines)",
+      "description": "200% FPL gross monthly income by household size - California MCE/BBCE gross screening limit for CalFresh (FFY2026, derived from 2025 HHS poverty guidelines)",
       "source": { "url": "https://www.cdss.ca.gov/Portals/9/Additional-Resources/Letters-and-Notices/ACINs/2025/I-46_25.pdf", "effectiveDate": "2025-10-01 to 2026-09-30", "verifiedBy": ["extract-agent", "verify-agent"] },
       "byHouseholdSize": { "1": 2610, "2": 3526, "3": 4442, "4": 5360, "5": 6276, "6": 7192, "7": 8110, "8": 9026 },
       "eachAdditionalPerson": 918
@@ -31,8 +31,8 @@
       "eachAdditionalPerson": 947
     },
     "muni_lifeline_200fpl": {
-      "description": "Clipper START / Muni Lifeline gross monthly income limit by household size — 200% of the 2026 HHS poverty guidelines (annual /12).",
-      "source": { "url": "https://www.sfmta.com/fares/clipper-start", "effectiveDate": "2026 program year", "verifiedBy": ["extract-agent", "verify-agent"], "note": "clipperstartcard.com chart blocked automated fetch (403); figures re-derived from 2026 HHS guidelines and cross-corroborated — re-confirm against the live chart before launch." },
+      "description": "Clipper START / Muni Lifeline gross monthly income limit by household size - 200% of the 2026 HHS poverty guidelines (annual /12).",
+      "source": { "url": "https://www.sfmta.com/fares/clipper-start", "effectiveDate": "2026 program year", "verifiedBy": ["extract-agent", "verify-agent"], "note": "clipperstartcard.com chart blocked automated fetch (403); figures re-derived from 2026 HHS guidelines and cross-corroborated - re-confirm against the live chart before launch." },
       "byHouseholdSize": { "1": 2660, "2": 3607, "3": 4553, "4": 5500, "5": 6447, "6": 7393, "7": 8340, "8": 9287 },
       "eachAdditionalPerson": 947
     },
@@ -55,7 +55,7 @@
       { "id": "medicare", "label": "Medicare" },
       { "id": "none", "label": "None of these" }
     ] },
-    { "id": "income_at_or_below", "type": "derived_boolean_per_threshold", "dependsOn": "household_size", "tables": ["calfresh_gross_200fpl", "medical_138fpl", "lifeline_income", "care_200fpl", "muni_lifeline_200fpl", "recology_200fpl"], "label": "Is your household's total gross monthly income at or below ${{amount}}?", "note": "App computes each $ amount from household size and asks yes/no — exact income is never collected." },
+    { "id": "income_at_or_below", "type": "derived_boolean_per_threshold", "dependsOn": "household_size", "tables": ["calfresh_gross_200fpl", "medical_138fpl", "lifeline_income", "care_200fpl", "muni_lifeline_200fpl", "recology_200fpl"], "label": "Is your household's total gross monthly income at or below ${{amount}}?", "note": "App computes each $ amount from household size and asks yes/no - exact income is never collected." },
     { "id": "has_earned_income", "type": "boolean", "label": "Did anyone in your household earn money from a job or self-employment this year?" },
     { "id": "will_file_taxes", "type": "boolean", "label": "Will you file a tax return this year?" },
     { "id": "has_sfusd_student", "type": "boolean", "label": "Do you have a child enrolled in a San Francisco public school (SFUSD)?" }
@@ -76,18 +76,18 @@
       ]
     },
     {
-      "id": "medi-cal", "name": "Medi-Cal", "benefitText": "Free or low-cost health coverage — doctor, hospital, prescriptions, dental, mental health",
+      "id": "medi-cal", "name": "Medi-Cal", "benefitText": "Free or low-cost health coverage - doctor, hospital, prescriptions, dental, mental health",
       "applyUrl": "https://benefitscal.com/", "source": { "url": "https://www.dhcs.ca.gov/services/medi-cal/eligibility/letters/Documents/26-01.pdf", "effectiveDate": "2026-01-01", "verifiedBy": ["extract-agent", "verify-agent"], "verdict": "AGREE" },
       "screen": true,
       "eligibility": { "any": [
         { "income": "medical_138fpl", "ruleText": "Your household's gross monthly income is at or below 138% of the Federal Poverty Level for your household size" },
-        { "enrolledAny": ["ssi"], "ruleText": "You receive SSI — in California, SSI recipients get Medi-Cal automatically, with no separate application" }
+        { "enrolledAny": ["ssi"], "ruleText": "You receive SSI - in California, SSI recipients get Medi-Cal automatically, with no separate application" }
       ] },
       "caveats": [
         "This is the adult (MAGI) income limit. Children qualify up to ~266% FPL and pregnant individuals up to ~213% FPL, so a household over 138% may still have eligible members.",
         "Full-scope Medi-Cal is open to all income-eligible adults regardless of immigration status (since 2024).",
         "Aged/Blind/Disabled, Medicare Savings, and Working Disabled programs use different limits and asset tests not modeled here.",
-        "Figures use the 2026 FPL per DHCS ACWDL 26-01; the public DHCS eligibility-chart webpage still showed stale 2025 figures as of June 2026 — do not use that page."
+        "Figures use the 2026 FPL per DHCS ACWDL 26-01; the public DHCS eligibility-chart webpage still showed stale 2025 figures as of June 2026 - do not use that page."
       ]
     },
     {
@@ -112,8 +112,8 @@
         { "income": "care_200fpl", "ruleText": "Your total household gross income is at or below the CARE income limit for your household size" }
       ] },
       "caveats": [
-        "CARE income limits equal 200% of the 2026 FPL, EXCEPT household size 1, which is granted the 2-person limit ($43,280/yr) — so a 1-person and 2-person household share the same limit.",
-        "FERA is a separate, smaller discount (about 18% off electricity) for households of 3+ with income between 200% and 250% FPL — not modeled in this CARE tree.",
+        "CARE income limits equal 200% of the 2026 FPL, EXCEPT household size 1, which is granted the 2-person limit ($43,280/yr) - so a 1-person and 2-person household share the same limit.",
+        "FERA is a separate, smaller discount (about 18% off electricity) for households of 3+ with income between 200% and 250% FPL - not modeled in this CARE tree.",
         "The full categorical list also includes LIHEAP, NSLP, CalWORKs/TANF, Head Start (Tribal), and BIA General Assistance; we model the four most common."
       ]
     },
@@ -121,27 +121,27 @@
       "id": "muni-lifeline", "name": "Muni Lifeline / Clipper START", "benefitText": "About 50% off Muni single-ride fares (ages 19-64)",
       "applyUrl": "https://www.clipperstartcard.com/", "source": { "url": "https://www.sfmta.com/fares/clipper-start", "effectiveDate": "2026 program year; Lifeline -> Clipper START transition 2026-05-01", "verifiedBy": ["extract-agent", "verify-agent"], "verdict": "AGREE" },
       "eligibility": { "any": [
-        { "enrolledAny": ["calfresh", "medi_cal"], "ruleText": "You are enrolled in CalFresh or Medi-Cal — proof of enrollment is accepted, so no income calculation is needed" },
+        { "enrolledAny": ["calfresh", "medi_cal"], "ruleText": "You are enrolled in CalFresh or Medi-Cal - proof of enrollment is accepted, so no income calculation is needed" },
         { "income": "muni_lifeline_200fpl", "ruleText": "Your total household gross income is at or below 200% of the Federal Poverty Level for your household size" }
       ] },
       "caveats": [
-        "As of May 1, 2026, SFMTA no longer accepts NEW Lifeline pass applications — new low-income riders apply for Clipper START. Existing Lifeline customers can buy monthly stickers through July 2026.",
+        "As of May 1, 2026, SFMTA no longer accepts NEW Lifeline pass applications - new low-income riders apply for Clipper START. Existing Lifeline customers can buy monthly stickers through July 2026.",
         "Clipper START also accepts proof of Unemployment benefits (not modeled in this tree).",
-        "The discount is 50% on Muni single rides; some other Bay Area operators give 20%. Income figures were re-derived from the 2026 poverty guidelines because the official Clipper START chart blocked automated access — re-confirm before launch."
+        "The discount is 50% on Muni single rides; some other Bay Area operators give 20%. Income figures were re-derived from the 2026 poverty guidelines because the official Clipper START chart blocked automated access - re-confirm before launch."
       ]
     },
     {
-      "id": "eitc-caleitc", "name": "EITC + CalEITC", "benefitText": "Cash-back tax credits — up to $8,046 federal + $3,756 state (plus $1,189 if you have a child under 6)",
+      "id": "eitc-caleitc", "name": "EITC + CalEITC", "benefitText": "Cash-back tax credits - up to $8,046 federal + $3,756 state (plus $1,189 if you have a child under 6)",
       "applyUrl": "https://www.ftb.ca.gov/file/personal/credits/california-earned-income-tax-credit.html", "source": { "url": "https://www.irs.gov/credits-deductions/individuals/earned-income-tax-credit/earned-income-and-earned-income-tax-credit-eitc-tables", "effectiveDate": "TY2025", "verifiedBy": ["extract-agent", "verify-agent"], "verdict": "AGREE" },
       "eligibility": { "all": [
         { "field": "has_earned_income", "equals": true, "ruleText": "You have earned income from a job or self-employment" },
-        { "field": "will_file_taxes", "equals": true, "ruleText": "You file a tax return — these credits are claimed there, even if you owe no tax" }
+        { "field": "will_file_taxes", "equals": true, "ruleText": "You file a tax return - these credits are claimed there, even if you owe no tax" }
       ] },
       "caveats": [
-        "The exact amount depends on your income, filing status, and number of qualifying children — the maximums require 3+ children.",
+        "The exact amount depends on your income, filing status, and number of qualifying children - the maximums require 3+ children.",
         "Federal EITC requires a Social Security number; CalEITC and the Young Child Tax Credit also accept an ITIN, so ITIN filers may qualify for the state credits.",
         "Earned-income ceilings (TY2025): federal up to $61,555 (single) / $68,675 (married, 3+ kids); CalEITC requires earned income of $32,900 or less. Federal investment income must be $11,950 or less.",
-        "California (CalEITC/YCTC) figures were corroborated from FTB-sourced partner pages because ftb.ca.gov blocked automated fetch — re-confirm against ftb.ca.gov before launch."
+        "California (CalEITC/YCTC) figures were corroborated from FTB-sourced partner pages because ftb.ca.gov blocked automated fetch - re-confirm against ftb.ca.gov before launch."
       ]
     },
     {
@@ -160,9 +160,9 @@
     {
       "id": "sf-school-meals", "name": "SF Free School Meals", "benefitText": "Free breakfast and lunch every school day for all SFUSD students (worth ~$1,200-$1,300 per student a year)",
       "applyUrl": "https://www.sfusd.edu/services/health-wellness/nutrition-school-meals", "source": { "url": "https://www.cde.ca.gov/ls/nu/sn/cauniversalmeals.asp", "effectiveDate": "2022-08-01", "verifiedBy": ["extract-agent", "verify-agent"], "verdict": "AGREE" },
-      "eligibility": { "field": "has_sfusd_student", "equals": true, "ruleText": "You have a child enrolled in an SFUSD school — under California Universal Meals, every enrolled student eats free regardless of household income, with no application" },
+      "eligibility": { "field": "has_sfusd_student", "equals": true, "ruleText": "You have a child enrolled in an SFUSD school - under California Universal Meals, every enrolled student eats free regardless of household income, with no application" },
       "caveats": [
-        "Universal — no income test and no application required (California Education Code 49501.5); the benefit is the meals themselves, not cash.",
+        "Universal - no income test and no application required (California Education Code 49501.5); the benefit is the meals themselves, not cash.",
         "Confirmed in effect for the 2026-27 school year. The ~$1,200-$1,300/student/yr value is an estimate from USDA reimbursement rates, not an official figure."
       ]
     }

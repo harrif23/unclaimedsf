@@ -2,7 +2,7 @@
   "jurisdiction": "San Francisco, CA",
   "fplYear": 2026,
   "amiYear": 2025,
-  "_note": "Seed list = INPUT to the compile workflow. The extract+verify agents read each source and produce ruleset.json. Rule DETAILS (thresholds, household-size tables) are intentionally NOT here — they are extracted from sources and adversarially verified. Marker '@verify' = URL/figure to confirm during extraction.",
+  "_note": "Seed list = INPUT to the compile workflow. The extract+verify agents read each source and produce ruleset.json. Rule DETAILS (thresholds, household-size tables) are intentionally NOT here - they are extracted from sources and adversarially verified. Marker '@verify' = URL/figure to confirm during extraction.",
   "core": [
     {
       "id": "calfresh",
@@ -37,7 +37,7 @@
       "name": "California LifeLine (phone / broadband)",
       "agency": "CPUC",
       "level": "state",
-      "role": "Largest take-up gap of all (~77% of eligible NOT enrolled @verify) — highest marginal yield for a finder.",
+      "role": "Largest take-up gap of all (~77% of eligible NOT enrolled @verify) - highest marginal yield for a finder.",
       "benefitSummary": "Up to ~$19/mo voice/broadband (~$228/yr) + broadband add-on; 1 per household",
       "ruleShape": "income <= threshold OR categorical enrollment.",
       "chainsFrom": ["calfresh", "medi-cal", "ssi", "wic"],
@@ -78,13 +78,13 @@
       "name": "Federal EITC + CalEITC (+ Young Child Tax Credit)",
       "agency": "IRS / CA FTB",
       "level": "state-federal",
-      "role": "Cash headline (largest single payout). Does NOT chain — requires filing a return. Flag whenever a low-income earning household appears.",
+      "role": "Cash headline (largest single payout). Does NOT chain - requires filing a return. Flag whenever a low-income earning household appears.",
       "benefitSummary": "Federal EITC up to ~$8,046; CalEITC up to ~$3,756; YCTC up to ~$1,189 (child <6) @verify TY",
       "ruleShape": "earned-income phase-in/out by family size; MUST file a tax return; SSN required (federal).",
       "chainsFrom": [],
       "sources": [
         { "type": "html", "url": "https://www.irs.gov/credits-deductions/individuals/earned-income-tax-credit" },
-        { "type": "html", "url": "https://www.ftb.ca.gov/file/personal/credits/california-earned-income-tax-credit.html", "note": "@verify — FTB page may 403 automated fetch" }
+        { "type": "html", "url": "https://www.ftb.ca.gov/file/personal/credits/california-earned-income-tax-credit.html", "note": "@verify - FTB page may 403 automated fetch" }
       ]
     }
   ],
@@ -105,9 +105,9 @@
       "name": "SF Universal Free School Meals",
       "agency": "SFUSD / CA Universal Meals",
       "level": "city-state",
-      "role": "Universal (no income test) — simple, broad, kid-household relevance.",
+      "role": "Universal (no income test) - simple, broad, kid-household relevance.",
       "benefitSummary": "Free meals for all SFUSD students (~$900-1,300/child value @verify)",
-      "ruleShape": "universal — enrolled SFUSD student.",
+      "ruleShape": "universal - enrolled SFUSD student.",
       "chainsFrom": [],
       "sources": [{ "type": "html", "url": "https://www.sfusd.edu/services/health-wellness/nutrition-school-meals" }]
     },

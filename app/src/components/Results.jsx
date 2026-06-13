@@ -1,57 +1,7 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { friendlyMissing } from '../lib.js';
 
-function FullCard({ r, answers }) {
-  const [s, setS] = useState({ status: 'idle', draft: '', error: '' });
-
-  async function draft() {
-    setS({ status: 'loading', draft: '', error: '' });
-    const ctrl = new AbortController();
-    const timer = setTimeout(() => ctrl.abort(), 25000);
-    try {
-      const res = await fetch('/api/draft-application', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ programName: r.name, benefitText: r.benefitText, ruleText: r.reasons, answers }),
-        signal: ctrl.signal,
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error || `Couldn't draft (status ${res.status}).`);
-      setS({ status: 'done', draft: data.draft || '', error: '' });
-    } catch (e) {
-      setS({ status: 'error', draft: '', error: e.name === 'AbortError' ? 'Drafting timed out — please try again.' : (e.message || 'Could not draft right now.') });
-    } finally {
-      clearTimeout(timer);
-    }
-  }
-
-  return (
-    <article className="card full">
-      <div className="card-head">
-        <strong>{r.name}</strong>
-        {r.applyUrl && <a className="apply" href={r.applyUrl} target="_blank" rel="noreferrer">Apply&nbsp;→</a>}
-      </div>
-      <p className="benefit">{r.benefitText}</p>
-      {r.reasons?.length > 0 && (
-        <p className="why"><span className="why-label">Why you match:</span> {r.reasons.join(' ')}</p>
-      )}
-      <div className="draft-row">
-        <button type="button" className="draft-btn" onClick={draft} disabled={s.status === 'loading'}>
-          {s.status === 'loading' ? 'Drafting…' : '✍️ Draft my application'}
-        </button>
-      </div>
-      {s.status === 'error' && <p className="draft-error">{s.error}</p>}
-      {s.status === 'done' && (
-        <div className="draft-out">
-          <p className="draft-label">Draft — review and fill in the blanks before submitting:</p>
-          <pre className="draft-text">{s.draft}</pre>
-        </div>
-      )}
-    </article>
-  );
-}
-
-export default function Results({ results, enrolledIds = [], answers = {} }) {
+export default function Results({ results, enrolledIds = [] }) {
   const already = results.filter((r) => enrolledIds.includes(r.id));
   const visible = results.filter((r) => !enrolledIds.includes(r.id));
   const full = visible.filter((r) => r.status === 'full');
@@ -64,7 +14,7 @@ export default function Results({ results, enrolledIds = [], answers = {} }) {
 
       {already.length > 0 && (
         <p className="already">
-          ✓ You're already enrolled in {already.map((r) => r.name).join(', ')}. Here's what else you may be missing:
+          You are already enrolled in {already.map((r) => r.name).join(', ')}. Here is what else you may be missing.
         </p>
       )}
 
@@ -76,14 +26,25 @@ export default function Results({ results, enrolledIds = [], answers = {} }) {
 
       {full.length > 0 && (
         <div className="group">
-          <h3 className="g-full">✅ You likely qualify</h3>
-          {full.map((r) => <FullCard key={r.id} r={r} answers={answers} />)}
+          <h3 className="g-full">You likely qualify</h3>
+          {full.map((r) => (
+            <article key={r.id} className="card full">
+              <div className="card-head">
+                <strong>{r.name}</strong>
+                {r.applyUrl && <a className="apply" href={r.applyUrl} target="_blank" rel="noreferrer">Apply</a>}
+              </div>
+              <p className="benefit">{r.benefitText}</p>
+              {r.reasons?.length > 0 && (
+                <p className="why"><span className="why-label">Why you match:</span> {r.reasons.join(' ')}</p>
+              )}
+            </article>
+          ))}
         </div>
       )}
 
       {partial.length > 0 && (
         <div className="group">
-          <h3 className="g-partial">🟡 You might qualify — a couple more answers needed</h3>
+          <h3 className="g-partial">You might qualify, with a couple more answers</h3>
           {partial.map((r) => (
             <article key={r.id} className="card partial">
               <div className="card-head"><strong>{r.name}</strong></div>

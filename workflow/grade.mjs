@@ -1,4 +1,4 @@
-// Grader — Phase 4 of the compile workflow, also runnable standalone.
+// Grader - Phase 4 of the compile workflow, also runnable standalone.
 // Runs the SAME engine the browser ships (app/src/match.js) over every case in
 // data/test-cases.json against data/ruleset.json. Exit 0 if all pass, else 1.
 
@@ -42,8 +42,8 @@ for (const c of suite.cases) {
 const total = suite.cases.length;
 console.log(`\nGrading ${total} cases  (ruleset: ${ruleset.meta?.graderStatus || 'unknown'})\n`);
 for (const f of failures) {
-  console.log(`  ✗ ${f.id}`);
+  console.log(`  FAIL ${f.id}`);
   for (const p of f.problems) console.log(`      - ${p}`);
 }
-console.log(`\n${passed}/${total} passed${failures.length ? `  — ${failures.length} FAILED ❌` : '  — ALL GREEN ✅'}\n`);
+console.log(`\n${passed}/${total} passed${failures.length ? `  (${failures.length} FAILED)` : '  ALL GREEN'}\n`);
 process.exit(failures.length ? 1 : 0);

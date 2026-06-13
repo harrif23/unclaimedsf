@@ -42,6 +42,7 @@ body {
 }
 .field-label { margin: 0 0 6px; font-weight: 600; font-size: 17px; }
 .field-note { margin: 0 0 10px; font-size: 13px; color: var(--muted); }
+.hint { margin: 0; font-size: 14px; color: var(--muted); }
 
 select {
   width: 100%; padding: 12px 14px; font-size: 17px; border: 1px solid var(--line);
@@ -64,8 +65,20 @@ select {
 .check input { width: 20px; height: 20px; accent-color: var(--brand); }
 .check span { font-size: 16px; }
 
+.see-results {
+  display: block; width: 100%; margin: 18px 0 8px; min-height: 52px;
+  background: var(--brand); color: #fff; border: none; border-radius: 12px;
+  font-size: 18px; font-weight: 700; cursor: pointer;
+}
+.see-results:hover { background: var(--brand-ink); }
+
 .results { margin-top: 28px; }
 .results h2 { font-size: 24px; margin: 0 0 8px; }
+.summary { font-size: 17px; margin: 0 0 12px; }
+.already {
+  font-size: 15px; color: var(--brand-ink); background: var(--full-bg);
+  padding: 10px 14px; border-radius: 8px; margin: 0 0 14px;
+}
 .group { margin: 18px 0; }
 .group h3 { font-size: 17px; margin: 0 0 10px; }
 .g-full { color: var(--full); }
@@ -95,25 +108,4 @@ footer p { font-size: 13px; color: var(--muted); }
 
 button:focus-visible, a:focus-visible, select:focus-visible, input:focus-visible {
   outline: 3px solid var(--focus); outline-offset: 2px;
-}
-
-.summary { font-size: 17px; margin: 0 0 12px; }
-.already {
-  font-size: 15px; color: var(--brand-ink); background: var(--full-bg);
-  padding: 10px 14px; border-radius: 8px; margin: 0 0 14px;
-}
-.impact-note { font-size: 12px; color: var(--muted); margin: -8px 0 14px; line-height: 1.45; }
-
-.draft-row { margin-top: 12px; }
-.draft-btn {
-  background: #fff; border: 1.5px solid var(--brand); color: var(--brand-ink);
-  border-radius: 10px; padding: 10px 14px; font-size: 15px; font-weight: 600; cursor: pointer; min-height: 44px;
-}
-.draft-btn:disabled { opacity: 0.6; cursor: default; }
-.draft-error { color: #b00020; font-size: 14px; margin: 8px 0 0; }
-.draft-out { margin-top: 10px; }
-.draft-label { font-size: 13px; color: var(--muted); margin: 0 0 6px; font-weight: 600; }
-.draft-text {
-  white-space: pre-wrap; font: 14px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace;
-  background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 12px; margin: 0; overflow-x: auto;
 }

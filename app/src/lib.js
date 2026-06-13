@@ -1,7 +1,5 @@
 // UI helpers for the questionnaire + results. Pure functions, no React.
 
-// Look up a threshold-table's dollar amount for a household size, extrapolating
-// past the published max with eachAdditionalPerson.
 export function thresholdFor(ruleset, tableId, size) {
   const t = ruleset.thresholdTables[tableId];
   if (!t) return null;
@@ -11,38 +9,46 @@ export function thresholdFor(ruleset, tableId, size) {
   return t.byHouseholdSize[String(maxSize)] + (size - maxSize) * (t.eachAdditionalPerson || 0);
 }
 
-// Collapse the per-program income thresholds into the smallest set of yes/no
-// questions: one per distinct dollar amount (privacy-preserving — the resident
-// answers a few "at or below $X?" questions, never an exact income).
-export function incomeQuestionsFor(ruleset, input, size) {
-  const byAmount = new Map();
-  for (const tableId of input.tables) {
-    const amt = thresholdFor(ruleset, tableId, size);
-    if (amt == null) continue;
-    if (!byAmount.has(amt)) byAmount.set(amt, []);
-    byAmount.get(amt).push(tableId);
+// Income ranges for a household size: one option per distinct program threshold, so the
+// resident picks a single range instead of answering many yes/no questions. Exact income
+// is never collected; the chosen range maps deterministically to each program limit.
+export function incomeBands(ruleset, input, size) {
+  const thresholds = [...new Set(input.tables.map((t) => thresholdFor(ruleset, t, size)).filter((v) => v != null))].sort((a, b) => a - b);
+  const bands = [];
+  let lower = 0;
+  for (const t of thresholds) {
+    bands.push({ upper: t, label: `$${lower.toLocaleString()} to $${t.toLocaleString()}` });
+    lower = t + 1;
   }
-  return [...byAmount.entries()]
-    .sort((a, b) => a[0] - b[0])
-    .map(([amount, tables]) => ({ amount, tables }));
+  const max = thresholds[thresholds.length - 1];
+  bands.push({ upper: Infinity, label: `More than $${max.toLocaleString()}` });
+  return bands;
+}
+
+// Given the selected range's upper bound, derive the yes/no the match engine expects for
+// each threshold table (income at or below that table's limit).
+export function incomeBooleans(ruleset, input, size, selectedUpper) {
+  const m = {};
+  for (const tableId of input.tables) {
+    const v = thresholdFor(ruleset, tableId, size);
+    if (v != null) m[tableId] = selectedUpper <= v;
+  }
+  return m;
 }
 
 const FRIENDLY = {
   household_size: 'your household size',
-  enrolled_programs: 'which programs you’re enrolled in',
+  enrolled_programs: 'which programs you are enrolled in',
   has_earned_income: 'whether you have earned income',
-  will_file_taxes: 'whether you’ll file a tax return',
+  will_file_taxes: 'whether you will file a tax return',
   sf_resident: 'whether you live in San Francisco',
 };
 
-// Turn a missing-field id into a plain-language phrase for partial matches.
 export function friendlyMissing(field) {
   if (field.startsWith('income_at_or_below')) return 'your income';
   return FRIENDLY[field] || field;
 }
 
-// Map programs a resident already has to our program ids, so results show
-// "already enrolled" instead of telling them to apply for something they have.
 const ENROLLED_TO_PROGRAM = { calfresh: 'calfresh', medi_cal: 'medi-cal' };
 export function enrolledProgramIds(answers) {
   return (answers.enrolled_programs || []).map((id) => ENROLLED_TO_PROGRAM[id]).filter(Boolean);
