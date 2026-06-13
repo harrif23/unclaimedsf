@@ -1,0 +1,6 @@
+{
+  "name": "unclaimedsf",
+  "private": true,
+  "type": "module",
+  "description": "Public Works — SF benefit-eligibility finder. App lives in app/; serverless function in api/."
+}

@@ -1,0 +1,24 @@
+{
+  "scope": "San Francisco",
+  "headline": "About 30,000 San Francisco households likely qualify for CalFresh but aren't receiving it — an estimated $115 million in food benefits left unclaimed every year.",
+  "uiNote": "Modeled upper bound from a 130%-FPL gross-income screen over real Census microdata; the true figure is lower (the screen omits CalFresh's net-income and asset tests). Observed take-up in this data: 39%. Shown for scale, not as an official count.",
+  "n_households": 29945,
+  "population_in_those_households": 50132,
+  "dollars_unclaimed_per_year": 114988800,
+  "observed_takeup_pct": 39.1,
+  "method": "Ran the app's CalFresh gross-income screen (200% FPL by household size) over every household record in the Census ACS 2023 5-year PUMS for SF PUMAs 07507/07508/07509/07510/07511/07512/07513/07514, then kept those that pass the screen AND report FS=2 (not receiving SNAP), weighted by WGTP.",
+  "assumptions": [
+    "Dollar figure = households x $320/month x 12 (approx. CA average CalFresh issuance per household) — an estimate, not a measured total."
+  ],
+  "caveats": [
+    "Modeled gross-income screen only — no net-income, deduction, or asset test, so it approximates eligibility, not an official determination.",
+    "SNAP receipt (FS) is self-reported and under-reported in the ACS, so the not-receiving count likely OVERSTATES the true gap.",
+    "PUMS is a weighted sample, not a census of every household.",
+    "Household income is ACS 5-year (2019-2023, inflation-adjusted to 2023) compared against current thresholds, so the estimate is approximate."
+  ],
+  "source": {
+    "name": "U.S. Census Bureau, ACS 2023 5-year PUMS",
+    "url": "https://www.census.gov/programs-surveys/acs/microdata.html"
+  },
+  "crosscheck": "Consistent with PPIC (81% of eligible Californians enrolled) and Nourish California (2.7M eligible-not-enrolled statewide, ~$3.46B/yr)."
+}

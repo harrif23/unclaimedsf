@@ -1,0 +1,137 @@
+{
+  "jurisdiction": "San Francisco, CA",
+  "fplYear": 2026,
+  "amiYear": 2025,
+  "_note": "Seed list = INPUT to the compile workflow. The extract+verify agents read each source and produce ruleset.json. Rule DETAILS (thresholds, household-size tables) are intentionally NOT here — they are extracted from sources and adversarially verified. Marker '@verify' = URL/figure to confirm during extraction.",
+  "core": [
+    {
+      "id": "calfresh",
+      "name": "CalFresh (SNAP)",
+      "agency": "CDSS / SF Human Services Agency",
+      "level": "state-federal",
+      "role": "ANCHOR + master key. One enrollment categorically unlocks CARE/FERA, California LifeLine, Muni Lifeline, Recology, school meals. Also drives the PUMS impact stat (PUMS has a SNAP-receipt flag).",
+      "benefitSummary": "~$2,300/person/yr food benefit; CA est. ~$3.46B/yr left unclaimed @verify",
+      "ruleShape": "gross income <=200% FPL (BBCE) + net <=100% FPL, by household size; many categorical paths. SCREEN, not final determination.",
+      "chainsFrom": [],
+      "sources": [
+        { "type": "html", "url": "https://www.cdss.ca.gov/calfresh" },
+        { "type": "html", "url": "https://calfresh.guide/income-limits/", "note": "LSNC income-limit tables @verify" },
+        { "type": "html", "url": "https://www.sf.gov/apply-calfresh-benefits", "note": "SF apply link @verify" }
+      ]
+    },
+    {
+      "id": "medi-cal",
+      "name": "Medi-Cal",
+      "agency": "DHCS / SF Health Plan",
+      "level": "state-federal",
+      "role": "Second anchor; highest-value benefit (full health coverage). SSI auto-enrolls. Triggers CARE/LifeLine + WIC income test.",
+      "benefitSummary": "Comprehensive coverage, $0 premium; open to all income-eligible adults regardless of status since 1/2024",
+      "ruleShape": "income <=138% FPL (adults), <=266% (kids), <=213% (pregnant), by household size; categorical via SSI.",
+      "chainsFrom": ["ssi"],
+      "sources": [
+        { "type": "html", "url": "https://www.dhcs.ca.gov/medi-cal/qualify/qualify-for-medi-cal-eligibility-chart/" }
+      ]
+    },
+    {
+      "id": "ca-lifeline",
+      "name": "California LifeLine (phone / broadband)",
+      "agency": "CPUC",
+      "level": "state",
+      "role": "Largest take-up gap of all (~77% of eligible NOT enrolled @verify) — highest marginal yield for a finder.",
+      "benefitSummary": "Up to ~$19/mo voice/broadband (~$228/yr) + broadband add-on; 1 per household",
+      "ruleShape": "income <= threshold OR categorical enrollment.",
+      "chainsFrom": ["calfresh", "medi-cal", "ssi", "wic"],
+      "sources": [
+        { "type": "html", "url": "https://www.cpuc.ca.gov/consumer-support/financial-assistance-savings-and-discounts/lifeline/california-lifeline-eligibility" }
+      ]
+    },
+    {
+      "id": "care-fera",
+      "name": "CARE / FERA (energy discount)",
+      "agency": "CPUC / PG&E",
+      "level": "state",
+      "role": "Clean chaining demo (CalFresh -> CARE). Near-automatic add-on.",
+      "benefitSummary": "CARE ~35% electric + 20% gas (~$500/yr @verify); FERA ~18% electric",
+      "ruleShape": "income <=200% FPL (CARE) / 200-250% (FERA) OR categorical enrollment.",
+      "chainsFrom": ["calfresh", "medi-cal", "ssi", "wic"],
+      "sources": [
+        { "type": "html", "url": "https://www.cpuc.ca.gov/industries-and-topics/electrical-energy/electric-costs/care-fera-program" },
+        { "type": "pdf", "url": "https://www.pge.com/.../care-fera-fact-sheet.pdf", "note": "PG&E CARE/FERA fact sheet @verify exact URL" }
+      ]
+    },
+    {
+      "id": "muni-lifeline",
+      "name": "Muni Lifeline / Clipper START",
+      "agency": "SFMTA",
+      "level": "city",
+      "role": "Keeps the tool visibly SF. Transit discount that chains off CalFresh/Medi-Cal.",
+      "benefitSummary": "Lifeline pass ~$43/mo (~$516/yr saved); Clipper START ~50% off single fares",
+      "ruleShape": "income <=200% FPL OR categorical (Medi-Cal/CalFresh/Unemployment via Clipper START).",
+      "chainsFrom": ["calfresh", "medi-cal"],
+      "sources": [
+        { "type": "html", "url": "https://www.sfmta.com/fares/lifeline-pass", "note": "transitioning to Clipper START; no new Lifeline apps after 2026-05-01 @verify current path" },
+        { "type": "html", "url": "https://www.clipperstartcard.com/" }
+      ]
+    },
+    {
+      "id": "eitc-caleitc",
+      "name": "Federal EITC + CalEITC (+ Young Child Tax Credit)",
+      "agency": "IRS / CA FTB",
+      "level": "state-federal",
+      "role": "Cash headline (largest single payout). Does NOT chain — requires filing a return. Flag whenever a low-income earning household appears.",
+      "benefitSummary": "Federal EITC up to ~$8,046; CalEITC up to ~$3,756; YCTC up to ~$1,189 (child <6) @verify TY",
+      "ruleShape": "earned-income phase-in/out by family size; MUST file a tax return; SSN required (federal).",
+      "chainsFrom": [],
+      "sources": [
+        { "type": "html", "url": "https://www.irs.gov/credits-deductions/individuals/earned-income-tax-credit" },
+        { "type": "html", "url": "https://www.ftb.ca.gov/file/personal/credits/california-earned-income-tax-credit.html", "note": "@verify — FTB page may 403 automated fetch" }
+      ]
+    }
+  ],
+  "stretch": [
+    {
+      "id": "recology",
+      "name": "Recology Low-Income Discount",
+      "agency": "Recology (SF-franchised)",
+      "level": "city",
+      "role": "Strong categorical chain (CARE/WIC/LIHEAP/CalFresh/CalWORKs/SSI/Medi-Cal/NSLP all qualify).",
+      "benefitSummary": "25% off refuse (~$133/yr @verify)",
+      "ruleShape": "income <=200% FPL OR categorical; single-unit residential.",
+      "chainsFrom": ["calfresh", "medi-cal", "ssi", "wic", "care-fera"],
+      "sources": [{ "type": "html", "url": "https://www.sf.gov/reports--october-2025--san-francisco-refuse-rates-october-2025-september-2026", "note": "@verify" }]
+    },
+    {
+      "id": "sf-school-meals",
+      "name": "SF Universal Free School Meals",
+      "agency": "SFUSD / CA Universal Meals",
+      "level": "city-state",
+      "role": "Universal (no income test) — simple, broad, kid-household relevance.",
+      "benefitSummary": "Free meals for all SFUSD students (~$900-1,300/child value @verify)",
+      "ruleShape": "universal — enrolled SFUSD student.",
+      "chainsFrom": [],
+      "sources": [{ "type": "html", "url": "https://www.sfusd.edu/services/health-wellness/nutrition-school-meals" }]
+    },
+    {
+      "id": "sfpuc-cap",
+      "name": "SFPUC Customer Assistance Program (water/sewer)",
+      "agency": "SFPUC",
+      "level": "city",
+      "role": "Genuinely SF-built program; AMI-tier + account-type exclusions rule shape (good extraction variety).",
+      "benefitSummary": "25% off (<=50% AMI) or 40% off (<=30% AMI) water + sewer",
+      "ruleShape": "income % of AMI tiers + residential single-family individually-metered account; not claimed as dependent.",
+      "chainsFrom": [],
+      "sources": [{ "type": "html", "url": "https://www.sfpuc.gov/accounts-services/bill-relief/customer-assistance-program-waterwastewater" }]
+    },
+    {
+      "id": "wic",
+      "name": "WIC",
+      "agency": "CDPH / local agency",
+      "level": "state-federal",
+      "role": "Income test met by CalFresh/Medi-Cal for households with kids <5; then itself triggers CARE + LifeLine.",
+      "benefitSummary": "CVB up to ~$52/mo + food package (~$624/yr+ @verify)",
+      "ruleShape": "income <=185% FPL + nutrition risk; women + children <5. (nutrition-risk screen -> often partial)",
+      "chainsFrom": ["calfresh", "medi-cal", "calworks"],
+      "sources": [{ "type": "html", "url": "https://www.phfewic.org/en/how-wic-works/who-qualifies/" }]
+    }
+  ]
+}

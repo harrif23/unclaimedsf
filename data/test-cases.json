@@ -1,0 +1,121 @@
+{
+  "_note": "RUBRIC. The grader runs app/src/match.js over each case's `answers` against the compiled ruleset.json and compares to `expect`. 100% pass = done. Threshold dollar values live in ruleset.json; cases reference threshold tables by id via `income_at_or_below`. PUMS-derived personas will be appended during build. 'full' for a SCREEN program means 'passes the eligibility screen'.",
+  "thresholdTableIds": [
+    "calfresh_gross_200fpl",
+    "medical_138fpl",
+    "lifeline_income",
+    "care_200fpl",
+    "muni_lifeline_200fpl",
+    "recology_200fpl",
+    "eitc_earned_limit"
+  ],
+  "cases": [
+    {
+      "id": "calfresh-cascade",
+      "description": "Already on CalFresh, household of 3 — the chaining reveal: categorical programs should all be full matches without any income question.",
+      "answers": { "sf_resident": true, "enrolled_programs": ["calfresh"], "household_size": 3 },
+      "expect": {
+        "care-fera": "full",
+        "ca-lifeline": "full",
+        "muni-lifeline": "full",
+        "recology": "full",
+        "medi-cal": "partial",
+        "eitc-caleitc": "partial"
+      },
+      "expectMissing": {
+        "medi-cal": ["income_at_or_below.medical_138fpl"],
+        "eitc-caleitc": ["has_earned_income", "will_file_taxes"]
+      }
+    },
+    {
+      "id": "ssi-recipient-senior",
+      "description": "SSI recipient, 65+. SSI auto-enrolls Medi-Cal and is a categorical path into the utility/phone discounts.",
+      "answers": { "sf_resident": true, "enrolled_programs": ["ssi"], "age_65_plus": true, "household_size": 1 },
+      "expect": {
+        "medi-cal": "full",
+        "care-fera": "full",
+        "ca-lifeline": "full"
+      }
+    },
+    {
+      "id": "low-income-earner-not-enrolled",
+      "description": "Working household of 4, not enrolled in anything, income below the CalFresh gross screen and EITC limit, will file taxes. The 'you're leaving money on the table' case.",
+      "answers": {
+        "sf_resident": true,
+        "household_size": 4,
+        "enrolled_programs": ["none"],
+        "has_earned_income": true,
+        "will_file_taxes": true,
+        "income_at_or_below": {
+          "calfresh_gross_200fpl": true,
+          "care_200fpl": true,
+          "lifeline_income": true,
+          "muni_lifeline_200fpl": true,
+          "eitc_earned_limit": true,
+          "medical_138fpl": true
+        }
+      },
+      "expect": {
+        "calfresh": "full",
+        "care-fera": "full",
+        "ca-lifeline": "full",
+        "muni-lifeline": "full",
+        "eitc-caleitc": "full",
+        "medi-cal": "full"
+      }
+    },
+    {
+      "id": "calfresh-boundary-just-over",
+      "description": "Household of 2, income just above the CalFresh gross screen and not enrolled — must NOT match CalFresh.",
+      "answers": {
+        "sf_resident": true,
+        "household_size": 2,
+        "enrolled_programs": ["none"],
+        "has_earned_income": true,
+        "income_at_or_below": { "calfresh_gross_200fpl": false, "care_200fpl": false, "lifeline_income": false }
+      },
+      "expect": { "calfresh": "no", "care-fera": "no", "ca-lifeline": "no" }
+    },
+    {
+      "id": "partial-missing-householdsize",
+      "description": "Not enrolled, no household size or income answered yet — CalFresh can't resolve, should be partial and ask for exactly those inputs.",
+      "answers": { "sf_resident": true, "enrolled_programs": ["none"] },
+      "expect": { "calfresh": "partial" },
+      "expectMissing": { "calfresh": ["household_size", "income_at_or_below.calfresh_gross_200fpl"] }
+    },
+    {
+      "id": "no-match-high-income",
+      "description": "Single person, high income, not enrolled, no earned-income credit path — clean no-match across the board.",
+      "answers": {
+        "sf_resident": true,
+        "household_size": 1,
+        "enrolled_programs": ["none"],
+        "has_earned_income": false,
+        "income_at_or_below": {
+          "calfresh_gross_200fpl": false,
+          "medical_138fpl": false,
+          "lifeline_income": false,
+          "care_200fpl": false,
+          "muni_lifeline_200fpl": false,
+          "recology_200fpl": false,
+          "eitc_earned_limit": false
+        }
+      },
+      "expect": {
+        "calfresh": "no",
+        "medi-cal": "no",
+        "ca-lifeline": "no",
+        "care-fera": "no",
+        "muni-lifeline": "no",
+        "recology": "no",
+        "eitc-caleitc": "no"
+      }
+    },
+    {
+      "id": "school-meals-universal",
+      "description": "Has a child enrolled in SFUSD -> universal free school meals (no income test).",
+      "answers": { "sf_resident": true, "has_sfusd_student": true },
+      "expect": { "sf-school-meals": "full" }
+    }
+  ]
+}
